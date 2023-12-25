@@ -103,7 +103,7 @@ screens = [
         top=bar.Bar(
             [
                 widget.CurrentLayout(),
-                widget.GroupBox(highlight_method="block"),
+                widget.GroupBox(highlight_method="text"),
                 widget.WindowName(),
                 widget.Prompt(),
                 widget.Chord(
