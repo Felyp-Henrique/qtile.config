@@ -104,7 +104,7 @@ screens = [
             [
                 widget.CurrentLayout(),
                 widget.GroupBox(highlight_method="text"),
-                widget.WindowName(),
+                # widget.WindowName(),
                 widget.Prompt(),
                 widget.Chord(
                     chords_colors={
