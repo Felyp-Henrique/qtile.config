@@ -1,156 +1,186 @@
-from typing import List
 from libqtile import bar, layout, widget
-from libqtile.config import Click, Drag, Key, Group, Match, Mouse, Screen
-from libqtile.layout.base import Layout
+from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
+from libqtile.utils import guess_terminal
 
 super = "mod4"
+terminal = guess_terminal()
 
+keys = [
+    #
+    # Move window focus to any other
+    #
+    Key(
+        [super],
+        "space",
+        lazy.layout.next(),
+        desc="Move window focus to other window",
+    ),
+    #
+    # Toggle fullscreen on the focused window
+    #
+    Key(
+        [super, "control", "shift"],
+        "f",
+        lazy.window.toggle_fullscreen(),
+        desc="Toggle fullscreen on the focused window",
+    ),
+    #
+    # Toggle floating on the focused window
+    #
+    Key(
+        [super, "control", "shift"],
+        "t",
+        lazy.window.toggle_floating(),
+        desc="Toggle floating on the focused window",
+    ),
+    #
+    # Reload the config
+    #
+    Key(
+        [super, "control"],
+        "r",
+        lazy.reload_config(),
+        desc="Reload the config",
+    ),
+    #
+    # Shutdown Qtile
+    #
+    Key(
+        [super, "control"],
+        "q",
+        lazy.shutdown(),
+        desc="Shutdown Qtile",
+    ),
+    #
+    # Spawn a command using a prompt widget
+    #
+    Key(
+        [super],
+        "r",
+        lazy.spawncmd(),
+        desc="Spawn a command using a prompt widget",
+    ),
+    #
+    # Spawn WezTerm
+    #
+    Key(
+        [super],
+        "Return",
+        lazy.spawn("/usr/bin/wezterm"),
+        desc="Spawn WezTerm",
+    ),
+]
 
-def get_keys() -> list[Key]:
-    """
-    Returns the keys configurations.
-    """
-    return [
-        #
-        # Move window focus to any other
-        #
-        Key(
-            [super],
-            "space",
-            lazy.layout.next(),
-            desc="Move window focus to other window",
-        ),
-        #
-        # Toggle fullscreen on the focused window
-        #
-        Key(
-            [super, "control", "shift"],
-            "f",
-            lazy.window.toggle_fullscreen(),
-            desc="Toggle fullscreen on the focused window",
-        ),
-        #
-        # Toggle floating on the focused window
-        #
-        Key(
-            [super, "control", "shift"],
-            "t",
-            lazy.window.toggle_floating(),
-            desc="Toggle floating on the focused window",
-        ),
-        #
-        # Reload the config
-        #
-        Key(
-            [super, "control"],
-            "r",
-            lazy.reload_config(),
-            desc="Reload the config",
-        ),
-        #
-        # Shutdown Qtile
-        #
-        Key(
-            [super, "control"],
-            "q",
-            lazy.shutdown(),
-            desc="Shutdown Qtile",
-        ),
-        #
-        # Spawn a command using a prompt widget
-        #
-        Key(
-            [super],
-            "r",
-            lazy.spawncmd(),
-            desc="Spawn a command using a prompt widget",
-        ),
-        #
-        # Spawn WezTerm
-        #
-        Key(
-            [super],
-            "Return",
-            lazy.spawn("/usr/bin/wezterm"),
-            desc="Spawn WezTerm",
-        ),
-    ]
+groups = [Group(i) for i in "123"]
 
+for i in groups:
+    keys.extend(
+        [
+            Key(
+                [super],
+                i.name,
+                lazy.group[i.name].toscreen(),
+                desc="Switch to group {}".format(i.name),
+            ),
+        ]
+    )
 
-def get_mouse() -> list[Mouse]:
-    """
-    Returns the mouse configuration.
-    """
-    return []
+layouts = [
+    layout.Max(),
+    layout.Columns(border_focus_stack=["#d75f5f", "#8f3d3d"], border_width=4),
+]
 
-
-def get_groups() -> list[Group]:
-    """
-    Returns the groups configurations.
-
-    Groups:
-
-    - general:
-      Here, all tasks is do.
-    - music:
-      Here, YouTube Music is opened.
-    - health:
-      Here, the htop command is opened.
-    """
-    return [Group(group_name) for group_name in "general music health".split()]
-
-
-def get_layouts() -> list[Layout]:
-    """
-    Returns the layouts configurations.
-    """
-    return []
-
-
-def get_screens() -> list[Screen]:
-    """
-    Returns the screens configurations.
-    """
-    return []
-
-
-#
-# Do Qtile configurations
-#
-keys = get_keys()
-layouts = get_layouts()
-groups = get_groups()
-sreens = get_screens()
 widget_defaults = dict(
     font="sans",
     fontsize=12,
     padding=3,
 )
 extension_defaults = widget_defaults.copy()
+
+screens = [
+    Screen(
+        top=bar.Bar(
+            [
+                widget.CurrentLayout(),
+                widget.GroupBox(),
+                widget.WindowName(),
+                widget.Prompt(),
+                widget.Chord(
+                    chords_colors={
+                        "launch": ("#ff0000", "#ffffff"),
+                    },
+                    name_transform=lambda name: name.upper(),
+                ),
+                widget.Systray(),
+                widget.Clock(format="%A %d/%m/%Y %I:%M:%S %p"),
+            ],
+            18,
+        ),
+    ),
+]
+
+#
+# Drag floating layouts.
+#
+mouse = [
+    #
+    # Move focused float window
+    #
+    Drag(
+        [super],
+        "Button1",
+        lazy.window.set_position_floating(),
+        start=lazy.window.get_position(),
+    ),
+    #
+    # Change focused float window's size
+    #
+    Drag(
+        [super],
+        "Button3",
+        lazy.window.set_size_floating(),
+        start=lazy.window.get_size(),
+    ),
+    #
+    # Bring to front
+    #
+    Click(
+        [super],
+        "Button2",
+        lazy.window.bring_to_front(),
+    ),
+]
+
 dgroups_key_binder = None
-dgroups_app_rules = []
+dgroups_app_rules = []  # type: list
 follow_mouse_focus = True
 bring_front_click = False
 floats_kept_above = True
 cursor_warp = False
+floating_layout = layout.Floating(
+    float_rules=[
+        # Run the utility of `xprop` to see the wm class and name of an X client.
+        *layout.Floating.default_float_rules,
+        Match(wm_class="confirmreset"),  # gitk
+        Match(wm_class="makebranch"),  # gitk
+        Match(wm_class="maketag"),  # gitk
+        Match(wm_class="ssh-askpass"),  # ssh-askpass
+        Match(title="branchdialog"),  # gitk
+        Match(title="pinentry"),  # GPG key password entry
+    ]
+)
 auto_fullscreen = True
 focus_on_window_activation = "smart"
 reconfigure_screens = True
-wl_input_rules = None
-wmname = "LG3D"
 
-#
-# Do keys replications between groups
-#
-for index, group in zip(range(1, len(groups) + 1), groups):
-    keys.extend(
-        [
-            Key(
-                [super],
-                str(index),
-                lazy.groups[group.name].toscreen(),
-                desc=f"Switch to group { group.name }",
-            ),
-        ]
-    )
+# If things like steam games want to auto-minimize themselves when losing
+# focus, should we respect this or not?
+auto_minimize = True
+
+# When using the Wayland backend, this can be used to configure input devices.
+wl_input_rules = None
+
+# We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
+# java that happens to be on java's whitelist.
+wmname = "LG3D"
