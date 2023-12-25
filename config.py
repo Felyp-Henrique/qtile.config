@@ -72,7 +72,26 @@ keys = [
     ),
 ]
 
-groups = [Group(i) for i in "123"]
+groups = [
+    Group(
+        "1",
+        label="",
+    ),
+    Group(
+        "2",
+        label="",
+        layout="max",
+        exclusive=True,
+        matches=[Match(wm_class="firefox")],
+    ),
+    Group(
+        "3",
+        label="",
+        layout="max",
+        exclusive=True,
+        matches=[Match(wm_class="music")],
+    ),
+]
 
 for i in groups:
     keys.extend(
@@ -93,9 +112,10 @@ layouts = [
 
 widget_defaults = dict(
     font="sans",
-    fontsize=12,
-    padding=3,
+    fontsize=10,
+    padding=2,
 )
+
 extension_defaults = widget_defaults.copy()
 
 screens = [
@@ -104,18 +124,12 @@ screens = [
             [
                 widget.CurrentLayout(),
                 widget.GroupBox(highlight_method="text"),
-                # widget.WindowName(),
+                widget.Spacer(),
                 widget.Prompt(),
-                widget.Chord(
-                    chords_colors={
-                        "launch": ("#ff0000", "#ffffff"),
-                    },
-                    name_transform=lambda name: name.upper(),
-                ),
-                widget.Systray(),
                 widget.Clock(format="%A %d/%m/%Y %I:%M:%S %p"),
             ],
-            18,
+            16,
+            margin=1,
         ),
     ),
 ]
