@@ -1,10 +1,26 @@
-from libqtile import bar, layout, widget
+import os
+import time
+from libqtile import bar, layout, widget, hook, qtile
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
 
 super = "mod4"
 terminal = guess_terminal()
+
+
+@hook.subscribe.startup_once
+def hook_start_picom():
+    """
+    Start the picom process
+    """
+    try:
+        rc = os.path.expanduser("~/.config/qtile/qtilerc")
+        time.sleep(2)
+        qtile.cmd_spawn(rc)
+    except:
+        pass
+
 
 keys = [
     #
@@ -20,7 +36,7 @@ keys = [
     # Toggle fullscreen on the focused window
     #
     Key(
-        [super, "control", "shift"],
+        [super, "control"],
         "f",
         lazy.window.toggle_fullscreen(),
         desc="Toggle fullscreen on the focused window",
@@ -29,7 +45,7 @@ keys = [
     # Toggle floating on the focused window
     #
     Key(
-        [super, "control", "shift"],
+        [super, "control"],
         "t",
         lazy.window.toggle_floating(),
         desc="Toggle floating on the focused window",
@@ -70,26 +86,50 @@ keys = [
         lazy.spawn("/usr/bin/wezterm"),
         desc="Spawn WezTerm",
     ),
+    #
+    # Toggle between layouts
+    #
+    Key(
+        [super],
+        "Tab",
+        lazy.next_layout(),
+        desc="Toggle between layouts",
+    ),
+    #
+    # Volume UP
+    #
+    Key(
+        [],
+        "XF86AudioRaiseVolume",
+        lazy.spawn("pactl set-sink-volume @DEFAULT_SINK@ +5%"),
+    ),
+    #
+    # Volume DOWN
+    #
+    Key(
+        [],
+        "XF86AudioLowerVolume",
+        lazy.spawn("pactl set-sink-volume @DEFAULT_SINK@ -5%"),
+    ),
 ]
 
 groups = [
     Group(
         "1",
-        label="",
+        label="",
+        layout="max",
     ),
     Group(
         "2",
+        label="",
+        layout="max",
+    ),
+    Group(
+        "3",
         label="",
         layout="max",
         exclusive=True,
         matches=[Match(wm_class="firefox")],
-    ),
-    Group(
-        "3",
-        label="",
-        layout="max",
-        exclusive=True,
-        matches=[Match(wm_class="music")],
     ),
 ]
 
@@ -107,29 +147,37 @@ for i in groups:
 
 layouts = [
     layout.Max(),
-    layout.Columns(border_focus_stack=["#d75f5f", "#8f3d3d"], border_width=4),
+    layout.Columns(
+        border_focus_stack=["#d75f5f", "#8f3d3d"],
+        border_width=1,
+    ),
 ]
 
 widget_defaults = dict(
     font="sans",
-    fontsize=10,
-    padding=2,
+    fontsize=12,
+    padding=8,
 )
 
 extension_defaults = widget_defaults.copy()
 
 screens = [
     Screen(
+        wallpaper="~/.config/qtile/wallpaper.png",
+        wallpaper_mode="fill",
         top=bar.Bar(
             [
-                widget.CurrentLayout(),
-                widget.GroupBox(highlight_method="text"),
+                widget.GroupBox(
+                    highlight_method="text",
+                ),
                 widget.Spacer(),
                 widget.Prompt(),
-                widget.Clock(format="%A %d/%m/%Y %I:%M:%S %p"),
+                widget.Clock(
+                    format="%d/%m/%Y %I:%M:%S",
+                ),
             ],
-            16,
-            margin=1,
+            20,
+            background=["#00000000", "#00000000"],
         ),
     ),
 ]
