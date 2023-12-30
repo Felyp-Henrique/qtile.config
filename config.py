@@ -146,10 +146,13 @@ for i in groups:
     )
 
 layouts = [
-    layout.Max(),
+    layout.Max(
+        margin=3,
+    ),
     layout.Columns(
         border_focus_stack=["#d75f5f", "#8f3d3d"],
         border_width=1,
+        margin=3,
     ),
 ]
 
@@ -163,21 +166,29 @@ extension_defaults = widget_defaults.copy()
 
 screens = [
     Screen(
-        wallpaper="~/.config/qtile/wallpaper.png",
+        wallpaper="~/.config/qtile/wallpaper.jpg",
         wallpaper_mode="fill",
         top=bar.Bar(
             [
                 widget.GroupBox(
                     highlight_method="text",
+                    active="#2e3440",
+                    inactive="#2e3440",
+                    foreground="#2e3440",
+                    block_highlight_text_color="#4c566a",
+                    this_current_screen_border="#4c566a",
+                    disable_drag=True,
                 ),
                 widget.Spacer(),
                 widget.Prompt(),
                 widget.Clock(
                     format="%d/%m/%Y %I:%M:%S",
+                    foreground="#2e3440",
                 ),
             ],
             20,
-            background=["#00000000", "#00000000"],
+            margin=3,
+            background=["#00000000"],
         ),
     ),
 ]
